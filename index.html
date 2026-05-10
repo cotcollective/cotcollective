@@ -5,586 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COT COLLECTIVE — The Architect</title>
     <meta name="description" content="Systems Architect & Vibecoder. Orchestration systémique. Exécution asymétrique. Montréal.">
-    <meta name="robots" content="noindex, nofollow">
-    <meta property="og:title" content="COT COLLECTIVE — The Architect">
-    <meta property="og:description" content="Systems Architect & Vibecoder. Zero-friction deployment. Montréal.">
-    <meta property="og:type" content="website">
-
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-
     <style>
-        body {
-            background-color: #050508;
-            color: #e0e0e0;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #050508; --bg2: #0a0a12; --green: #00ff88; --green-glow: rgba(0,255,136,0.15);
+            --green-dim: rgba(0,255,136,0.06); --red: #ff2d2d; --text: #e0e0e0; --text2: #999; --text3: #555;
+            --mono: 'JetBrains Mono', monospace; --sans: 'Inter', -apple-system, sans-serif;
         }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.7; overflow-x: hidden; }
+        ::selection { background: var(--green-glow); color: var(--green); }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--green); }
 
-        ::selection { background: #00ff8830; color: #00ff88; }
+        /* LOADER */
+        .loader { position: fixed; inset: 0; z-index: 10000; background: var(--bg); display: flex; align-items: center; justify-content: center; transition: opacity 0.5s, visibility 0.5s; }
+        .loader.out { opacity: 0; visibility: hidden; }
+        .loader span { font-family: var(--mono); font-size: 12px; letter-spacing: 6px; color: var(--green); text-transform: uppercase; animation: blink 1.2s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
 
-        .glass {
-            background: rgba(10, 10, 20, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(0, 255, 136, 0.08);
+        /* NAV */
+        nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(5,5,8,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.04); }
+        nav .inner { max-width: 1140px; margin: 0 auto; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--green); letter-spacing: 2px; text-decoration: none; }
+        .nav-links { display: flex; gap: 28px; list-style: none; }
+        .nav-links a { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--green); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,0.5)} 50%{box-shadow:0 0 0 6px transparent; opacity:.7} }
+        .nav-status { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--green); }
+
+        /* LAYOUT */
+        .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+        section { padding: 100px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .section-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--green); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .section-tag::before { content: ''; width: 20px; height: 1px; background: var(--green); }
+        .section-title { font-size: clamp(32px, 5vw, 52px); font-weight: 900; letter-spacing: -1.5px; margin-bottom: 48px; }
+
+        /* HERO */
+        #hero { min-height: 100vh; display: flex; align-items: center; position: relative; }
+        #hero::before { content: ''; position: absolute; top: -40%; right: -20%; width: 70vw; height: 70vw; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%); pointer-events: none; }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--green); padding: 6px 14px; border: 1px solid rgba(0,255,136,0.3); background: rgba(0,255,136,0.04); margin-bottom: 28px; }
+        .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+        .hero-title { font-size: clamp(44px, 7vw, 80px); font-weight: 900; letter-spacing: -3px; line-height: 0.95; margin-bottom: 24px; }
+        .hero-title .accent { color: var(--green); text-shadow: 0 0 30px rgba(0,255,136,0.3); }
+        .hero-title .outline { color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.2); }
+        .hero-desc { font-size: 18px; color: var(--text2); line-height: 1.7; max-width: 520px; margin-bottom: 36px; border-left: 2px solid rgba(0,255,136,0.3); padding-left: 16px; }
+        .hero-desc strong { color: var(--text); font-weight: 600; }
+        .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--green); color: var(--bg); font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; transition: all 0.3s; }
+        .btn-primary:hover { box-shadow: 0 0 40px rgba(0,255,136,0.3); transform: translateY(-1px); }
+        .btn-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: transparent; color: var(--text2); font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border: 1px solid #222; transition: all 0.3s; }
+        .btn-ghost:hover { border-color: var(--text3); color: var(--text); }
+
+        /* METRICS PANEL */
+        .metrics-panel { position: relative; background: rgba(10,10,20,0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.06); padding: 28px; border-radius: 8px; overflow: hidden; }
+        .metrics-panel::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to bottom, transparent, rgba(0,255,136,0.02), transparent); animation: scanline 4s linear infinite; pointer-events: none; }
+        @keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(200%)} }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+        .panel-header span { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+        .dots { display: flex; gap: 4px; }
+        .dots span { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-red { background: rgba(255,45,45,0.2); }
+        .dot-yel { background: rgba(255,200,0,0.2); }
+        .dot-grn { background: var(--green); }
+        .metric-row { margin-bottom: 16px; }
+        .metric-row-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-family: var(--mono); font-size: 11px; }
+        .metric-row-label .label { color: var(--text3); }
+        .metric-row-label .value { color: var(--green); }
+        .metric-bar { height: 4px; background: #111; border-radius: 2px; overflow: hidden; }
+        .metric-bar-fill { height: 100%; border-radius: 2px; }
+        .terminal-block { margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.04); border-radius: 4px; font-family: var(--mono); font-size: 11px; color: var(--text3); line-height: 1.6; }
+        .terminal-block .t-green { color: var(--green); }
+
+        /* DOCTRINE */
+        .doctrine-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,0.03); }
+        .doctrine-card { background: var(--bg); padding: 36px 28px; transition: background 0.4s; }
+        .doctrine-card:hover { background: var(--bg2); }
+        .doctrine-card .num { font-family: var(--mono); font-size: 48px; font-weight: 700; color: #111; margin-bottom: 20px; transition: color 0.4s; }
+        .doctrine-card:hover .num { color: rgba(0,255,136,0.12); }
+        .doctrine-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+        .doctrine-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+        .doctrine-card .tag { font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: 1px; margin-top: 20px; }
+
+        /* MATRICE */
+        .category { margin-bottom: 64px; }
+        .category:last-child { margin-bottom: 0; }
+        .cat-header { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 24px; }
+        .cat-num { font-family: var(--mono); font-size: 64px; font-weight: 700; color: #111; line-height: 1; flex-shrink: 0; }
+        .cat-label { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--red); margin-bottom: 2px; }
+        .cat-title { font-size: 22px; font-weight: 700; }
+        .cat-desc { font-size: 14px; color: var(--text2); margin-top: 4px; max-width: 600px; }
+        .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .project-card { background: rgba(10,10,20,0.8); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.04); padding: 20px; border-radius: 6px; display: flex; flex-direction: column; transition: all 0.3s; position: relative; }
+        .project-card:hover { border-color: rgba(0,255,136,0.2); transform: translateY(-2px); box-shadow: 0 0 30px rgba(0,255,136,0.05); }
+        .project-card .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .project-card .card-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #0a0a14; border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; }
+        .project-card .card-icon svg { width: 18px; height: 18px; }
+        .status-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+        .s-operational { color: #4ade80; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.2); }
+        .s-dev { color: #facc15; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.2); }
+        .s-sold { color: #c084fc; background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.2); }
+        .s-beta { color: #22d3ee; background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); }
+        .s-research { color: #60a5fa; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2); }
+        .s-concept { color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2); }
+        .s-archived { color: #a78bfa; background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); }
+        .s-prototype { color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2); }
+        .project-card h4 { font-family: var(--mono); font-size: 14px; font-weight: 600; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .project-card .card-desc { font-size: 13px; color: var(--text2); line-height: 1.5; flex-grow: 1; margin-bottom: 12px; }
+        .project-card .tech-tags { display: flex; flex-wrap: wrap; gap: 4px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.04); }
+        .tech-tag { font-family: var(--mono); font-size: 9px; color: var(--text3); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 3px; }
+
+        /* METRICS SECTION */
+        .metrics-section-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: rgba(255,255,255,0.03); }
+        .metric-card { background: var(--bg); padding: 36px 20px; text-align: center; transition: background 0.4s; }
+        .metric-card:hover { background: var(--bg2); }
+        .metric-val { font-family: var(--mono); font-size: 40px; font-weight: 700; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); margin-bottom: 8px; }
+        .metric-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; line-height: 1.4; }
+
+        /* CONTACT */
+        .contact-box { background: rgba(10,10,20,0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.06); padding: 64px 48px; text-align: center; position: relative; }
+        .contact-box::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 2px; background: var(--green); }
+        .contact-box h3 { font-size: 26px; font-weight: 700; margin-bottom: 10px; }
+        .contact-box .sub { font-size: 15px; color: var(--text2); margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto; }
+        .contact-email { display: inline-block; font-family: var(--mono); font-size: 16px; color: var(--green); text-decoration: none; padding: 14px 32px; border: 1px solid var(--green); transition: all 0.3s; }
+        .contact-email:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 40px rgba(0,255,136,0.3); }
+        .contact-note { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 20px; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* WARNING */
+        .warning { margin-top: 48px; padding: 20px 24px; border: 1px solid rgba(255,45,45,0.15); border-left: 2px solid var(--red); background: rgba(255,45,45,0.03); font-size: 13px; color: var(--text2); line-height: 1.7; }
+        .warning strong { color: var(--red); }
+        .warning a { color: var(--green); text-decoration: none; }
+        .warning a:hover { text-decoration: underline; }
+
+        /* FOOTER */
+        footer { padding: 36px 0; text-align: center; border-top: 1px solid rgba(255,255,255,0.04); }
+        footer p { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+        footer .links { margin-top: 10px; display: flex; justify-content: center; gap: 24px; }
+        footer a { font-family: var(--mono); font-size: 11px; color: var(--text3); text-decoration: none; letter-spacing: 1px; }
+        footer a:hover { color: var(--green); }
+
+        /* CANVAS BG */
+        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.25; pointer-events: none; }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .hero-panel { display: none; }
+            .doctrine-grid { grid-template-columns: repeat(2, 1fr); }
+            .projects-grid { grid-template-columns: repeat(2, 1fr); }
+            .metrics-section-grid { grid-template-columns: repeat(3, 1fr); }
         }
-        .glass-hover:hover {
-            border-color: rgba(0, 255, 136, 0.25);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
-        }
-
-        .neon-green { text-shadow: 0 0 10px rgba(0, 255, 136, 0.4); }
-        .glow-green { box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .anim-in { animation: fadeInUp 0.7s ease forwards; }
-        .anim-delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .anim-delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .anim-delay-3 { animation-delay: 0.3s; opacity: 0; }
-        .anim-delay-4 { animation-delay: 0.4s; opacity: 0; }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.5); }
-            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0, 255, 136, 0); }
-        }
-        .dot-pulse { animation: pulse-dot 2s ease-in-out infinite; }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(200%); }
-        }
-        .scanline::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%;
-            background: linear-gradient(to bottom, transparent, rgba(0, 255, 136, 0.03), transparent);
-            transform: translateY(-100%);
-            animation: scanline 4s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
-        .glitch-text:hover { animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite; color: #ff2d2d; }
-
-        .category-line {
-            background: linear-gradient(90deg, #00ff88, transparent);
-            height: 1px;
+        @media (max-width: 640px) {
+            section { padding: 64px 0; }
+            .container { padding: 0 16px; }
+            .nav-links { display: none; }
+            .doctrine-grid { grid-template-columns: 1fr; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .metrics-section-grid { grid-template-columns: repeat(2, 1fr); }
+            .hero-title { letter-spacing: -2px; }
+            .hero-actions { flex-direction: column; }
+            .btn-primary, .btn-ghost { justify-content: center; width: 100%; }
+            .contact-box { padding: 40px 20px; }
+            .cat-header { flex-direction: column; gap: 8px; }
+            .cat-num { font-size: 40px; }
+            .metric-val { font-size: 28px; }
+            .metric-card { padding: 24px 12px; }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React;
+<!-- LOADER -->
+<div class="loader" id="loader"><span>INITIALISATION</span></div>
 
-        // ── ICONS ──
-        const I = ({ size=24, className="", children }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
-        );
-        const TerminalIcon = (p) => <I {...p}><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></I>;
-        const ZapIcon = (p) => <I {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></I>;
-        const ChevronRight = (p) => <I {...p}><polyline points="9 18 15 12 9 6"/></I>;
-        const GlobeIcon = (p) => <I {...p}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></I>;
-        const DollarIcon = (p) => <I {...p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></I>;
-        const LockIcon = (p) => <I {...p}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></I>;
-        const DatabaseIcon = (p) => <I {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></I>;
-        const BrainIcon = (p) => <I {...p}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></I>;
-        const ActivityIcon = (p) => <I {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></I>;
-        const NetworkIcon = (p) => <I {...p}><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><line x1="12" y1="12" x2="12" y2="8"/></I>;
-        const BookIcon = (p) => <I {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></I>;
-        const LayersIcon = (p) => <I {...p}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></I>;
-        const MailIcon = (p) => <I {...p}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></I>;
-        const GithubIcon = (p) => <I {...p}><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></I>;
-        const ExternalLinkIcon = (p) => <I {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></I>;
-        const XCircleIcon = (p) => <I {...p}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></I>;
-        const CpuIcon = (p) => <I {...p}><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></I>;
-        const TrendingIcon = (p) => <I {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></I>;
-        const ShieldIcon = (p) => <I {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></I>;
-        const ServerIcon = (p) => <I {...p}><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></I>;
-        const FilmIcon = (p) => <I {...p}><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></I>;
-        const BotIcon = (p) => <I {...p}><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></I>;
-        const AnchorIcon = (p) => <I {...p}><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></I>;
+<!-- CANVAS BG -->
+<canvas id="bgCanvas"></canvas>
 
-        // ── DATA ──
-        const CATEGORIES = [
-            {
-                id: 'cat-1',
-                number: 'I',
-                label: 'LOGistique TERRESTRE & ÉVÉNEMENTIEL',
-                title: 'Gestion de crise et orchestration terrain',
-                desc: 'Systèmes déployés sous pression — environnements haute vitesse, zéro marge d\'erreur.',
-                color: 'from-emerald-500 to-green-400',
-                accent: 'text-emerald-400',
-                borderColor: 'border-emerald-500/30',
-                projects: [
-                    { title: 'SENTINEL', status: 'OPERATIONAL :: GRAND PRIX', desc: 'Gestion de crise Grand Prix — surveillance temps réel, escalation automatisée, tableau de bord opérateur.', tech: ['Real-time', 'Crisis Management', 'Dashboard'], icon: ShieldIcon, color: 'text-emerald-400' },
-                    { title: 'K8S_RESOLUTION', status: 'CONSULTING :: DELIVERED', desc: 'Intervention chirurgicale sur infrastructure critique. Diagnostic et résolution de goulots d\'étranglement d\'orchestration pour un acteur majeur du gaming.', tech: ['Kubernetes', 'Cloud Eng', 'Scalability'], icon: CpuIcon, color: 'text-blue-400' },
-                ]
-            },
-            {
-                id: 'cat-2',
-                label: 'ORCHESTRATION IA & SYSTÈMES LOCAUX',
-                title: 'Moteurs autonomes, forges de modèles',
-                desc: 'Agents multi-plateformes, orchestration LLM, fine-tuning souverain — toute la chaîne, zéro API externe.',
-                number: 'II',
-                color: 'from-cyan-500 to-blue-400',
-                accent: 'text-cyan-400',
-                borderColor: 'border-cyan-500/30',
-                projects: [
-                    { title: 'GRISELDA BOT SUITE', status: 'OPERATIONAL :: MULTI-PLATFORM', desc: 'Suite d\'agents IA multi-plateformes (Telegram, Instagram, Twitter) avec moteur centralisé et proxy reverse.', tech: ['Multi-agent', 'LLM Local', 'Reverse Proxy'], icon: BotIcon, color: 'text-cyan-400' },
-                    { title: 'TRENDSPIRE_AI', status: 'BETA :: ANALYTICS', desc: 'Moteur d\'intelligence économique autonome. Scrape le web, prédit les tendances, génère les visuels et alimente les pipelines de vente ciblés.', tech: ['Scraping', 'Predictive ML', 'Gen-AI', 'Auto-Sales'], icon: TrendingIcon, color: 'text-red-400' },
-                    { title: 'PROJECT ARCHYTAS', status: 'R&D :: WHITEPAPER', desc: 'Infrastructure cognitive souveraine. Fusion de BitNet et Liquid Neural Networks pour une IA locale adaptative.', tech: ['LNN', 'BitNet', 'Rust', 'Local LLM'], icon: BrainIcon, color: 'text-red-400' },
-                    { title: 'LATENT_SMITH', status: 'IN DEV :: FORGE', desc: 'Forge de modèles locaux — fine-tuning, merge, quantization sur infrastructure GPU privée. Souveraineté matérielle totale.', tech: ['Fine-tuning', 'Quantization', 'GPU Rigs', 'Local-first'], icon: ServerIcon, color: 'text-purple-400' },
-                    { title: 'SOVEREIGN DECISION KIT', status: 'DEPLOYED :: SOLD', desc: 'Architecture décisionnelle adversarielle packagée en produit IP pur. Monétisation immédiate.', tech: ['Adversarial Logic', 'Digital Product', 'Gumroad API'], icon: DollarIcon, color: 'text-green-400' },
-                    { title: 'SHEET_BUILDER (DTF)', status: 'OPERATIONAL :: V1.0', desc: 'Automatisation industrielle via Python. Transformation d\'un processus manuel à haute latence en job de clic instantané.', tech: ['Python', 'Computer Vision', 'Automation'], icon: ZapIcon, color: 'text-yellow-400' },
-                    { title: 'CYBER_SENTINEL', status: 'CONCEPT :: BOT', desc: 'Bot de modération contextuelle pour communautés privées. Analyse sémantique en temps réel pour détection de toxicité.', tech: ['Discord API', 'NLP', 'Real-time'], icon: TerminalIcon, color: 'text-yellow-500' },
-                ]
-            },
-            {
-                id: 'cat-3',
-                label: 'HÉRITAGE NUMÉRIQUE & PRÉSERVATION',
-                title: 'Mémoire souveraine, accès perpétuel',
-                desc: 'Préservation de l\'information au-delà du présent. Souveraineté numérique sur la mémoire collective.',
-                number: 'III',
-                color: 'from-amber-500 to-orange-400',
-                accent: 'text-amber-400',
-                borderColor: 'border-amber-500/30',
-                projects: [
-                    { title: 'TESTAMENT VIVANT', status: 'OPERATIONAL :: SOVEREIGN', desc: 'Système de préservation et transmission numérique — accès conditionnel basé sur le temps et l\'identité. Souveraineté posthume.', tech: ['Conditional Access', 'Secure Storage', 'Time-based Crypto'], icon: LockIcon, color: 'text-amber-400' },
-                    { title: 'JEMESOUVIENTV', status: 'OPERATIONAL :: ARCHIVE', desc: 'Archivage et diffusion pérenne de contenu culturel — mémoire collective souveraine.', tech: ['Archival', 'Streaming', 'Cultural Heritage'], icon: FilmIcon, color: 'text-orange-400' },
-                    { title: 'PROJET PASSAGE', status: 'MARKET :: LEAD GEN', desc: 'Interface de synthèse mémorielle pour l\'industrie funéraire. Génération de messages post-mortem via IA.', tech: ['Gen-AI Video', 'Secure Storage', 'Business Logic'], icon: LockIcon, color: 'text-cyan-400' },
-                ]
-            },
-            {
-                id: 'cat-4',
-                label: 'RECHERCHE & CONCEPTS',
-                title: 'R&D, publications et prototypes',
-                desc: 'Expérimentation fondamentale. Architecture distribuée, IA safety, marketplace design.',
-                number: 'IV',
-                color: 'from-purple-500 to-pink-400',
-                accent: 'text-purple-400',
-                borderColor: 'border-purple-500/30',
-                projects: [
-                    { title: 'HYDRA', status: 'CONCEPT :: ARCHITECTURE', desc: 'Protocole de stockage inspiré du biomimétisme (mycélium). Architecture distribuée antifragile.', tech: ['P2P Protocol', 'Biomimicry', 'Cryptography'], icon: NetworkIcon, color: 'text-purple-400' },
-                    { title: 'FILM COMPANION', status: 'POC :: MATRIX_SYNC', desc: 'Couche de synchronisation contextuelle temps réel. Analyse IA injectée dynamiquement dans les sous-titres.', tech: ['Real-time Sync', 'NLP Analysis', 'WebSockets'], icon: ActivityIcon, color: 'text-green-400' },
-                    { title: 'CIAD RESEARCH', status: 'PUBLISHED :: ACADEMIC', desc: 'Recherche fondamentale sur la dérive d\'alignement contextuelle (Context-Induced Alignment Drift).', tech: ['AI Safety', 'Academic Paper', 'Zenodo'], icon: BookIcon, color: 'text-slate-300' },
-                    { title: 'DOLLAR_A_PROMPT', status: 'ANALYSIS :: PRE-SEED', desc: 'Modèle de marketplace à haut volume et faible coût pour l\'ingénierie de prompts.', tech: ['Market Analysis', 'Micro-SaaS', 'E-commerce'], icon: LayersIcon, color: 'text-yellow-400' },
-                    { title: 'HEADCIRCUS_APP', status: 'ARCHIVED :: FACEBOOK', desc: 'Application sociale déployée sur l\'écosystème Facebook historique. Preuve de déploiement à grande échelle.', tech: ['Social Graph', 'Legacy API', 'Viral Mechanics'], icon: LayersIcon, color: 'text-purple-500' },
-                    { title: 'L\'EMPIRE IPTV', status: 'EXIT :: SOLD', desc: 'Preuve de concept d\'échelle. Infrastructure de streaming haute disponibilité bâtie, maintenue et liquidée.', tech: ['High-Availability', 'CDN', 'Business Exit'], icon: GlobeIcon, color: 'text-purple-400' },
-                    { title: 'MÉCANO-PRIX', status: 'PROTOTYPE :: FUNCTIONAL', desc: 'Marketplace d\'arbitrage pour le marché de la mécanique automobile. Réduit l\'asymétrie d\'information.', tech: ['React', 'Marketplace Logic', 'UX/UI'], icon: DatabaseIcon, color: 'text-blue-400' },
-                ]
-            }
-        ];
+<!-- NAV -->
+<nav>
+    <div class="inner">
+        <a href="#hero" class="logo">COT◈COLLECTIVE</a>
+        <ul class="nav-links">
+            <li><a href="#doctrine">Doctrine</a></li>
+            <li><a href="#matrice">Matrice</a></li>
+            <li><a href="#metriques">Métriques</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="nav-status"><div class="status-dot"></div><span>OPERATOR_AVAILABLE</span></div>
+    </div>
+</nav>
 
-        const DOCTRINES = [
-            { num: '01', title: 'Orchestration Systémique', desc: 'Composants atomiques, flux directionnels, émergence contrôlée. Pas de moving parts inutiles — chaque élément sert.', tag: 'SYSTEM DESIGN' },
-            { num: '02', title: 'Exécution Asymétrique', desc: 'MVP conçu et déployé en <2h. Pas de sprints de 2 semaines. Un problème, une solution, déploiement.', tag: 'RAPID DEPLOY' },
-            { num: '03', title: 'Souveraineté Matérielle', desc: 'LLM locaux. Quadro rigs. Aucune dépendance cloud. Le hardware est la licence. Les données restent chez moi.', tag: 'LOCAL FIRST' },
-            { num: '04', title: 'Zero-Friction Deployment', desc: 'Pas de RFP. Pas de pitch deck. Pas de bureaucracy. Un problème → une solution → shipping. Le mouvement est tout.', tag: 'NO BUREAUCRACY' },
-        ];
-
-        const METRICS = [
-            { value: '<2h', label: 'Conception → Déploiement' },
-            { value: '1–3', label: 'Cycles d\'itération' },
-            { value: '100%', label: 'LLM Local Souverain' },
-            { value: '0', label: 'Friction Bureaucratique' },
-            { value: '18+', label: 'Systèmes Conçus' },
-            { value: '3', label: 'Exits Réussis' },
-        ];
-
-        // ── MATRIX MODAL ──
-        const MatrixModal = ({ onClose, onRedPill }) => (
-            <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl">
-                <div className="max-w-md w-full text-center space-y-8">
-                    <div className="font-mono text-green-400 mb-8 animate-pulse text-lg tracking-widest">SYSTEM_BREACH_DETECTED</div>
-                    <p className="text-gray-300 font-mono leading-relaxed mb-8">C'est ton dernier arrêt. Après ça, il n'y a pas de retour en arrière.</p>
-                    <div className="flex gap-8 justify-center items-center">
-                        <button onClick={onClose} className="group flex flex-col items-center gap-4 transition-transform hover:scale-105">
-                            <div className="w-16 h-8 rounded-full bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.6)] border border-blue-400/50 group-hover:shadow-[0_0_30px_rgba(37,99,235,0.9)] transition-all"></div>
-                            <span className="font-mono text-xs text-blue-400 opacity-60 group-hover:opacity-100">IGNORANCE</span>
-                        </button>
-                        <button onClick={onRedPill} className="group flex flex-col items-center gap-4 transition-transform hover:scale-105">
-                            <div className="w-16 h-8 rounded-full bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] border border-red-400/50 group-hover:shadow-[0_0_30px_rgba(220,38,38,0.9)] transition-all"></div>
-                            <span className="font-mono text-xs text-red-400 opacity-60 group-hover:opacity-100">VÉRITÉ</span>
-                        </button>
+<!-- HERO -->
+<section id="hero">
+    <div class="container">
+        <div class="hero-grid">
+            <div>
+                <div class="badge"><div class="dot"></div>SYSTEMS ARCHITECT — MONTRÉAL</div>
+                <h1 class="hero-title">
+                    <span class="block">The</span>
+                    <span class="block accent">Architect</span>
+                    <span class="block outline">Vibecoder</span>
+                </h1>
+                <p class="hero-desc">J'orchestre des systèmes, pas des <strong>comités</strong>. MVP déployé en <strong><2h</strong>. LLM locaux. <strong>Zéro friction.</strong> Souveraineté matérielle ou rien.</p>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn-primary">Initier le contact →</a>
+                    <a href="#matrice" class="btn-ghost">Voir la matrice</a>
+                </div>
+            </div>
+            <div class="hero-panel">
+                <div style="position:relative;">
+                    <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+                    <div class="metrics-panel">
+                        <div class="panel-header"><span>OPERATIONAL_METRICS</span><div class="dots"><span class="dot-red"></span><span class="dot-yel"></span><span class="dot-grn"></span></div></div>
+                        <div class="metric-row"><div class="metric-row-label"><span class="label">DEPLOYED_ASSETS</span><span class="value">18+ UNITS</span></div><div class="metric-bar"><div class="metric-bar-fill" style="width:100%;background:var(--green);box-shadow:0 0 6px rgba(0,255,136,0.5);"></div></div></div>
+                        <div class="metric-row"><div class="metric-row-label"><span class="label">COGNITIVE_LOAD</span><span style="color:#a78bfa;">OPTIMIZED</span></div><div class="metric-bar"><div class="metric-bar-fill" style="width:85%;background:#a78bfa;"></div></div></div>
+                        <div class="metric-row"><div class="metric-row-label"><span class="label">ITERATION_SPEED</span><span class="value"><2H</span></div><div class="metric-bar"><div class="metric-bar-fill" style="width:95%;background:var(--green);box-shadow:0 0 6px rgba(0,255,136,0.5);"></div></div></div>
+                        <div class="terminal-block">> load_module: sovereignty<br>> initializing Neural Networks... OK<br>> executing automation_scripts... OK<br>> status: <span class="t-green">READY_FOR_DEPLOYMENT</span></div>
                     </div>
                 </div>
             </div>
-        );
+        </div>
+    </div>
+</section>
 
-        // ── GHOST TERMINAL ──
-        const GhostTerminal = ({ onClose }) => {
-            const [input, setInput] = useState('');
-            const [history, setHistory] = useState([
-                { type: 'system', content: 'GHOST_SHELL_V1.0 INITIALIZED...' },
-                { type: 'system', content: 'CONNECTED TO SECURE NODE.' },
-                { type: 'info', content: 'Type "help" for command list.' }
-            ]);
-            const inputRef = useRef(null);
-            const scrollRef = useRef(null);
+<!-- DOCTRINE -->
+<section id="doctrine">
+    <div class="container">
+        <div class="section-tag">01 — Doctrine</div>
+        <h2 class="section-title">Comment j'opère</h2>
+        <div class="doctrine-grid">
+            <div class="doctrine-card"><div class="num">01</div><h3>Orchestration<br>Systémique</h3><p>Composants atomiques, flux directionnels, émergence contrôlée. Pas de moving parts inutiles — chaque élément sert.</p><div class="tag">→ SYSTEM DESIGN</div></div>
+            <div class="doctrine-card"><div class="num">02</div><h3>Exécution<br>Asymétrique</h3><p>Du concept à la production en <2h. Pas de sprints de 2 semaines. Un problème, une solution, déploiement.</p><div class="tag">→ RAPID DEPLOY</div></div>
+            <div class="doctrine-card"><div class="num">03</div><h3>Souveraineté<br>Matérielle</h3><p>LLM locaux. Quadro rigs. Aucune dépendance cloud. Le hardware est la licence. Les données restent chez moi.</p><div class="tag">→ LOCAL FIRST</div></div>
+            <div class="doctrine-card"><div class="num">04</div><h3>Zero-Friction<br>Deployment</h3><p>Pas de RFP. Pas de pitch deck. Pas de bureaucracy. Un problème → une solution → shipping. Le mouvement est tout.</p><div class="tag">→ NO BUREAUCRACY</div></div>
+        </div>
+    </div>
+</section>
 
-            useEffect(() => { if (inputRef.current) inputRef.current.focus(); }, [history]);
-            useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [history]);
+<!-- MATRICE -->
+<section id="matrice">
+    <div class="container">
+        <div class="section-tag">02 — La Matrice</div>
+        <h2 class="section-title">Systèmes déployés</h2>
 
-            const executeCommand = useCallback((cmd) => {
-                const c = cmd.trim().toLowerCase();
-                let response = null, type = 'success';
-                const allProjects = CATEGORIES.flatMap(cat => cat.projects.map(p => ({ name: p.title, status: p.status })));
+        <!-- CAT I -->
+        <div class="category">
+            <div class="cat-header"><div class="cat-num">I</div><div><div class="cat-label">LOGISTIQUE TERRESTRE & ÉVÉNEMENTIEL</div><div class="cat-title">Gestion de crise et orchestration terrain</div><div class="cat-desc">Systèmes déployés sous pression — environnements haute vitesse, zéro marge d'erreur.</div></div></div>
+            <div class="projects-grid">
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span class="status-badge s-operational">OPERATIONAL</span></div><h4>SENTINEL</h4><p class="card-desc">Gestion de crise Grand Prix — surveillance temps réel, escalation automatisée, tableau de bord opérateur.</p><div class="tech-tags"><span class="tech-tag">Real-time</span><span class="tech-tag">Crisis Mgmt</span><span class="tech-tag">Dashboard</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg></div><span class="status-badge s-sold">DELIVERED</span></div><h4>K8S_RESOLUTION</h4><p class="card-desc">Intervention chirurgicale sur infrastructure critique. Diagnosis et résolution de goulots d'étranglement pour un acteur majeur du gaming.</p><div class="tech-tags"><span class="tech-tag">Kubernetes</span><span class="tech-tag">Cloud Eng</span><span class="tech-tag">Scalability</span></div></div>
+            </div>
+        </div>
 
-                if (c === 'help') response = "COMMANDS: status | projects | doctrine | metrics | whoami | clear | exit | gem";
-                else if (c === 'status') response = "SYSTEM INTEGRITY: 100%\nUPTIME: INFINITE\nDEPLOYMENT: NETLIFY/STATIC\nFRAMEWORK: REACT_V18_NO_BUILD\nARCHITECT: OPERATIONAL";
-                else if (c === 'projects') { response = JSON.stringify(allProjects, null, 2); }
-                else if (c === 'doctrine') response = DOCTRINES.map(d => `[${d.num}] ${d.title}: ${d.desc}`).join('\n\n');
-                else if (c === 'metrics') response = METRICS.map(m => `${m.value.padEnd(6)} :: ${m.label}`).join('\n');
-                else if (c === 'whoami') { type = 'error'; response = "USER UNKNOWN. TRACING IP... [PROXY DETECTED]. ACCESS GRANTED AS GHOST."; }
-                else if (c === 'gem') { type = 'warning'; response = "I am the ghost in the machine. Watching. Learning. Waiting for your next input."; }
-                else if (c === 'sudo') { type = 'error'; response = "NICE TRY. YOU HAVE NO POWER HERE."; }
-                else if (c === 'clear') { setHistory([]); return; }
-                else if (c === 'exit') { onClose(); return; }
-                else { type = 'error'; response = `COMMAND NOT RECOGNIZED: ${c}`; }
+        <!-- CAT II -->
+        <div class="category">
+            <div class="cat-header"><div class="cat-num">II</div><div><div class="cat-label">ORCHESTRATION IA & SYSTÈMES LOCAUX</div><div class="cat-title">Moteurs autonomes, forges de modèles</div><div class="cat-desc">Agents multi-plateformes, orchestration LLM, fine-tuning souverain — toute la chaîne, zéro API externe.</div></div></div>
+            <div class="projects-grid">
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></div><span class="status-badge s-operational">MULTI-PLATFORM</span></div><h4>GRISELDA BOT SUITE</h4><p class="card-desc">Suite d'agents IA multi-plateformes (Telegram, Instagram, Twitter) avec moteur centralisé et proxy reverse.</p><div class="tech-tags"><span class="tech-tag">Multi-agent</span><span class="tech-tag">LLM Local</span><span class="tech-tag">Reverse Proxy</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span class="status-badge s-beta">BETA</span></div><h4>TRENDSPIRE_AI</h4><p class="card-desc">Moteur d'intelligence économique autonome. Scrape le web, prédit les tendances, génère les visuels et alimente les pipelines de vente.</p><div class="tech-tags"><span class="tech-tag">Scraping</span><span class="tech-tag">Predictive ML</span><span class="tech-tag">Gen-AI</span><span class="tech-tag">Auto-Sales</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg></div><span class="status-badge s-research">R&D</span></div><h4>PROJECT ARCHYTAS</h4><p class="card-desc">Infrastructure cognitive souveraine. Fusion de BitNet et Liquid Neural Networks pour une IA locale adaptative.</p><div class="tech-tags"><span class="tech-tag">LNN</span><span class="tech-tag">BitNet</span><span class="tech-tag">Rust</span><span class="tech-tag">Local LLM</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div><span class="status-badge s-dev">IN DEV</span></div><h4>LATENT_SMITH</h4><p class="card-desc">Forge de modèles locaux — fine-tuning, merge, quantization sur infrastructure GPU privée. Souveraineté matérielle totale.</p><div class="tech-tags"><span class="tech-tag">Fine-tuning</span><span class="tech-tag">Quantization</span><span class="tech-tag">GPU Rigs</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span class="status-badge s-sold">SOLD</span></div><h4>SOVEREIGN DECISION KIT</h4><p class="card-desc">Architecture décisionnelle adversarielle packagée en produit IP pur. Monétisation immédiate.</p><div class="tech-tags"><span class="tech-tag">Adversarial Logic</span><span class="tech-tag">Digital Product</span><span class="tech-tag">Gumroad</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span class="status-badge s-operational">V1.0</span></div><h4>SHEET_BUILDER (DTF)</h4><p class="card-desc">Automatisation industrielle via Python. Transformation d'un processus manuel à haute latence en job de clic instantané.</p><div class="tech-tags"><span class="tech-tag">Python</span><span class="tech-tag">Computer Vision</span><span class="tech-tag">Automation</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><span class="status-badge s-concept">CONCEPT</span></div><h4>CYBER_SENTINEL</h4><p class="card-desc">Bot de modération contextuelle pour communautés privées. Analyse sémantique temps réel pour détection de toxicité.</p><div class="tech-tags"><span class="tech-tag">Discord API</span><span class="tech-tag">NLP</span><span class="tech-tag">Real-time</span></div></div>
+            </div>
+        </div>
 
-                if (response) setHistory(prev => [...prev, { type: 'input', content: `> ${cmd}` }, { type, content: response }]);
-            }, [onClose]);
+        <!-- CAT III -->
+        <div class="category">
+            <div class="cat-header"><div class="cat-num">III</div><div><div class="cat-label">HÉRITAGE NUMÉRIQUE & PRÉSERVATION</div><div class="cat-title">Mémoire souveraine, accès perpétuel</div><div class="cat-desc">Préservation de l'information au-delà du présent. Souveraineté numérique sur la mémoire collective.</div></div></div>
+            <div class="projects-grid">
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span class="status-badge s-operational">SOVEREIGN</span></div><h4>TESTAMENT VIVANT</h4><p class="card-desc">Système de préservation et transmission numérique — accès conditionnel basé sur le temps et l'identité. Souveraineté posthume.</p><div class="tech-tags"><span class="tech-tag">Conditional Access</span><span class="tech-tag">Secure Storage</span><span class="tech-tag">Time-based Crypto</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div><span class="status-badge s-operational">ARCHIVE</span></div><h4>JEMESOUVIENS</h4><p class="card-desc">Archivage et diffusion pérenne de contenu culturel — mémoire collective souveraine.</p><div class="tech-tags"><span class="tech-tag">Archival</span><span class="tech-tag">Streaming</span><span class="tech-tag">Cultural Heritage</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><span class="status-badge s-beta">LEAD GEN</span></div><h4>PROJET PASSAGE</h4><p class="card-desc">Interface de synthèse mémorielle pour l'industrie funéraire. Génération de messages post-mortem via IA.</p><div class="tech-tags"><span class="tech-tag">Gen-AI Video</span><span class="tech-tag">Secure Storage</span><span class="tech-tag">Business Logic</span></div></div>
+            </div>
+        </div>
 
-            const handleSubmit = (e) => { e.preventDefault(); if (!input.trim()) return; executeCommand(input); setInput(''); };
+        <!-- CAT IV -->
+        <div class="category">
+            <div class="cat-header"><div class="cat-num">IV</div><div><div class="cat-label">RECHERCHE & CONCEPTS</div><div class="cat-title">R&D, publications et prototypes</div><div class="cat-desc">Expérimentation fondamentale. Architecture distribuée, IA safety, marketplace design.</div></div></div>
+            <div class="projects-grid">
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><line x1="12" y1="12" x2="12" y2="8"/></svg></div><span class="status-badge s-concept">CONCEPT</span></div><h4>HYDRA</h4><p class="card-desc">Protocole de stockage inspiré du biomimétisme (mycélium). Architecture distribuée antifragile.</p><div class="tech-tags"><span class="tech-tag">P2P Protocol</span><span class="tech-tag">Biomimicry</span><span class="tech-tag">Cryptography</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span class="status-badge s-prototype">POC</span></div><h4>FILM COMPANION</h4><p class="card-desc">Couche de synchronisation contextuelle temps réel. Analyse IA injectée dynamiquement dans les sous-titres.</p><div class="tech-tags"><span class="tech-tag">Real-time Sync</span><span class="tech-tag">NLP</span><span class="tech-tag">WebSockets</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><span class="status-badge s-research">PUBLISHED</span></div><h4>CIAD RESEARCH</h4><p class="card-desc">Recherche fondamentale sur la dérive d'alignement contextuelle (Context-Induced Alignment Drift).</p><div class="tech-tags"><span class="tech-tag">AI Safety</span><span class="tech-tag">Academic Paper</span><span class="tech-tag">Zenodo</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><span class="status-badge s-concept">PRE-SEED</span></div><h4>DOLLAR_A_PROMPT</h4><p class="card-desc">Modèle de marketplace à haut volume et faible coût pour l'ingénierie de prompts.</p><div class="tech-tags"><span class="tech-tag">Market Analysis</span><span class="tech-tag">Micro-SaaS</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div><span class="status-badge s-archived">ARCHIVED</span></div><h4>HEADCIRCUS_APP</h4><p class="card-desc">Application sociale déployée sur l'écosystème Facebook historique. Preuve de déploiement à grande échelle.</p><div class="tech-tags"><span class="tech-tag">Social Graph</span><span class="tech-tag">Legacy API</span><span class="tech-tag">Viral</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span class="status-badge s-sold">EXIT</span></div><h4>L'EMPIRE IPTV</h4><p class="card-desc">Preuve de concept d'échelle. Infrastructure de streaming haute disponibilité bâtie, maintenue et liquidée.</p><div class="tech-tags"><span class="tech-tag">High-Availability</span><span class="tech-tag">CDN</span><span class="tech-tag">Business Exit</span></div></div>
+                <div class="project-card"><div class="card-top"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div><span class="status-badge s-prototype">PROTOTYPE</span></div><h4>MÉCANO-PRIX</h4><p class="card-desc">Marketplace d'arbitrage pour le marché de la mécanique automobile. Réduit l'asymétrie d'information.</p><div class="tech-tags"><span class="tech-tag">React</span><span class="tech-tag">Marketplace</span><span class="tech-tag">UX/UI</span></div></div>
+            </div>
+        </div>
+    </div>
+</section>
 
-            return (
-                <div className="fixed inset-0 z-[201] bg-black/90 font-mono p-4 flex items-center justify-center backdrop-blur-sm" onClick={onClose}>
-                    <div className="w-full max-w-3xl h-[80vh] bg-gray-950 border border-green-500/50 rounded shadow-[0_0_50px_rgba(34,197,94,0.15)] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="bg-gray-900 px-4 py-2 border-b border-green-500/30 flex justify-between items-center text-xs text-green-500">
-                            <span>TERMINAL // GHOST_ACCESS</span>
-                            <button onClick={onClose} className="hover:text-red-500"><XCircleIcon size={16} /></button>
-                        </div>
-                        <div className="flex-1 p-4 overflow-y-auto space-y-2 text-sm" ref={scrollRef}>
-                            {history.map((line, i) => (
-                                <div key={i} className={`whitespace-pre-wrap ${line.type === 'input' ? 'text-gray-400' : line.type === 'error' ? 'text-red-400' : line.type === 'warning' ? 'text-yellow-400' : 'text-green-400'}`}>
-                                    {line.content}
-                                </div>
-                            ))}
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-4 bg-gray-900 border-t border-green-500/30 flex gap-2">
-                            <span className="text-green-500 animate-pulse">{'>'}</span>
-                            <input ref={inputRef} type="text" value={input} onChange={e => setInput(e.target.value)} className="flex-1 bg-transparent border-none outline-none text-green-400 font-mono placeholder-green-900" placeholder="Enter command..." autoFocus />
-                        </form>
-                    </div>
-                </div>
-            );
-        };
+<!-- METRICS -->
+<section id="metriques">
+    <div class="container">
+        <div class="section-tag">03 — Métriques</div>
+        <h2 class="section-title">Chiffres d'exécution</h2>
+        <div class="metrics-section-grid">
+            <div class="metric-card"><div class="metric-val"><2h</div><div class="metric-label">Conception →<br>Déploiement</div></div>
+            <div class="metric-card"><div class="metric-val">1–3</div><div class="metric-label">Cycles<br>d'itération</div></div>
+            <div class="metric-card"><div class="metric-val">100%</div><div class="metric-label">LLM Local<br>Souverain</div></div>
+            <div class="metric-card"><div class="metric-val">0</div><div class="metric-label">Friction<br>Bureaucratique</div></div>
+            <div class="metric-card"><div class="metric-val">18+</div><div class="metric-label">Systèmes<br>Conçus</div></div>
+            <div class="metric-card"><div class="metric-val">3</div><div class="metric-label">Exits<br>Réussis</div></div>
+        </div>
+    </div>
+</section>
 
-        // ── NETWORK BACKGROUND ──
-        const NetworkBackground = () => {
-            const canvasRef = useRef(null);
-            useEffect(() => {
-                const canvas = canvasRef.current;
-                const ctx = canvas.getContext('2d');
-                let w, h, particles = [];
-                const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w; canvas.height = h; init(); };
-                const init = () => {
-                    particles = [];
-                    const count = Math.floor((w * h) / 22000);
-                    for (let i = 0; i < count; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25, s: Math.random() * 1.5 + 0.5 });
-                };
-                const draw = () => {
-                    ctx.clearRect(0, 0, w, h);
-                    ctx.fillStyle = '#00ff88';
-                    ctx.strokeStyle = 'rgba(0, 255, 136, 0.06)';
-                    particles.forEach((p, i) => {
-                        p.x += p.vx; p.y += p.vy;
-                        if (p.x < 0 || p.x > w) p.vx *= -1;
-                        if (p.y < 0 || p.y > h) p.vy *= -1;
-                        ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill();
-                        for (let j = i + 1; j < particles.length; j++) {
-                            const p2 = particles[j], dx = p.x - p2.x, dy = p.y - p2.y, d = Math.sqrt(dx * dx + dy * dy);
-                            if (d < 120) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
-                        }
-                    });
-                    requestAnimationFrame(draw);
-                };
-                window.addEventListener('resize', resize);
-                resize(); draw();
-                return () => window.removeEventListener('resize', resize);
-            }, []);
-            return <canvas ref={canvasRef} className="fixed top-0 left-0 -z-10 opacity-30" />;
-        };
+<!-- CONTACT -->
+<section id="contact">
+    <div class="container">
+        <div class="section-tag">04 — Contact</div>
+        <div class="contact-box">
+            <h3>Vous cherchez de l'efficacité chirurgicale, pas des heures facturables.</h3>
+            <p class="sub">Pas de pitch deck. Pas de RFP. Décrivez le problème. Si c'est dans mon spectre, je déploie.</p>
+            <a href="mailto:architect@cotcollective.com" class="contact-email">architect@cotcollective.com</a>
+            <p class="contact-note">Pour les opérations nécessitant une exécution asymétrique</p>
+        </div>
+        <div class="warning">
+            <strong>⚠️ CLOSED INTELLECTUAL PROPERTY</strong> — Tous les dépôts sont des Proof of Work démontrant la capacité d'exécution de l'Architect. Le code source métier reste Closed IP. Toute reproduction, ingénierie inverse ou usage commercial est strictement interdit sans accord explicite. Consultez <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md">LICENSE_RESTRICTIVE.md</a>.
+        </div>
+    </div>
+</section>
 
-        // ── NAVBAR ──
-        const Navbar = () => (
-            <nav className="fixed top-0 w-full z-50 glass border-b border-white/5 backdrop-blur-xl">
-                <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-                    <a href="#hero" className="flex items-center gap-2 font-mono text-sm font-bold tracking-widest neon-green" style={{ color: '#00ff88' }}>
-                        COT◈COLLECTIVE
-                    </a>
-                    <div className="hidden md:flex gap-8 text-xs font-mono text-gray-500">
-                        <a href="#doctrine" className="hover:text-green-400 transition-colors">DOCTRINE</a>
-                        <a href="#matrice" className="hover:text-green-400 transition-colors">MATRICE</a>
-                        <a href="#metriques" className="hover:text-green-400 transition-colors">MÉTRIQUES</a>
-                        <a href="#contact" className="hover:text-green-400 transition-colors">CONTACT</a>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full dot-pulse" style={{ background: '#00ff88', boxShadow: '0 0 8px rgba(0,255,136,0.6)' }}></div>
-                        <span className="text-[10px] font-mono" style={{ color: '#00ff88' }}>OPERATOR_AVAILABLE</span>
-                    </div>
-                </div>
-            </nav>
-        );
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <p>© 2025 THE ARCHITECT — MONTRÉAL, QC. ALL RIGHTS RESERVED.</p>
+        <div class="links">
+            <a href="https://github.com/cotcollective">GITHUB</a>
+            <a href="mailto:architect@cotcollective.com">EMAIL</a>
+            <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md">LICENCE</a>
+        </div>
+    </div>
+</footer>
 
-        // ── HERO ──
-        const Hero = () => (
-            <section id="hero" className="min-h-screen flex items-center justify-center pt-14 relative">
-                <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
-                    <div className="space-y-6 z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 border font-mono text-[11px] tracking-widest rounded-sm" style={{ borderColor: 'rgba(0,255,136,0.3)', background: 'rgba(0,255,136,0.05)', color: '#00ff88' }}>
-                            <span className="h-1.5 w-1.5 rounded-full dot-pulse" style={{ background: '#00ff88' }}></span>
-                            SYSTEMS ARCHITECT — MONTRÉAL
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-black leading-none tracking-tighter">
-                            <span className="block text-white/90">The</span>
-                            <span className="block neon-green" style={{ color: '#00ff88' }}>Architect</span>
-                            <span className="block text-transparent" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.2)' }}>Vibecoder</span>
-                        </h1>
-                        <p className="text-gray-400 text-lg max-w-lg leading-relaxed border-l-2 pl-4" style={{ borderColor: 'rgba(0,255,136,0.3)' }}>
-                            J'orchestre des systèmes, pas des <strong className="text-white">comités</strong>. MVP déployé en <strong className="text-white"><2h</strong>. LLM locaux. <strong className="text-white">Zéro friction.</strong> Souveraineté matérielle ou rien.
-                        </p>
-                        <div className="flex gap-4 pt-4">
-                            <a href="#contact" className="px-8 py-3 font-mono text-sm font-semibold tracking-wider text-black transition-all hover:shadow-lg" style={{ background: '#00ff88', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}>
-                                INITIER LE CONTACT →
-                            </a>
-                            <a href="#matrice" className="px-8 py-3 font-mono text-sm tracking-wider border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white transition-all">
-                                VOIR LA MATRICE
-                            </a>
-                        </div>
-                    </div>
+<script>
+// Loader
+window.addEventListener('load', () => { setTimeout(() => { document.getElementById('loader').classList.add('out'); }, 500); });
 
-                    <div className="relative hidden md:block">
-                        <div className="absolute inset-0 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%)' }}></div>
-                        <div className="relative glass p-6 rounded-lg border border-white/10 scanline overflow-hidden">
-                            <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-2">
-                                <span className="font-mono text-[10px] text-gray-600">OPERATIONAL_METRICS</span>
-                                <div className="flex gap-1">
-                                    <div className="w-2 h-2 rounded-full bg-red-500/20"></div>
-                                    <div className="w-2 h-2 rounded-full bg-yellow-500/20"></div>
-                                    <div className="w-2 h-2 rounded-full" style={{ background: '#00ff88' }}></div>
-                                </div>
-                            </div>
-                            <div className="space-y-5 font-mono text-xs">
-                                <div>
-                                    <div className="flex justify-between mb-1"><span className="text-gray-500">DEPLOYED_ASSETS</span><span style={{ color: '#00ff88' }}>18+ UNITS</span></div>
-                                    <div className="h-1 w-full bg-gray-800 rounded-full"><div className="h-full rounded-full" style={{ background: '#00ff88', width: '100%', boxShadow: '0 0 6px rgba(0,255,136,0.5)' }}></div></div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between mb-1"><span className="text-gray-500">COGNITIVE_LOAD</span><span className="text-purple-400">OPTIMIZED</span></div>
-                                    <div className="h-1 w-full bg-gray-800 rounded-full"><div className="h-full bg-purple-400 rounded-full" style={{ width: '85%' }}></div></div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between mb-1"><span className="text-gray-500">ITERATION_SPEED</span><span style={{ color: '#00ff88' }}><2H</span></div>
-                                    <div className="h-1 w-full bg-gray-800 rounded-full"><div className="h-full rounded-full" style={{ background: '#00ff88', width: '95%', boxShadow: '0 0 6px rgba(0,255,136,0.5)' }}></div></div>
-                                </div>
-                                <div className="p-3 bg-black/60 rounded border border-white/5 text-gray-600">
-                                    > load_module: sovereignty<br/>
-                                    > initializing Neural Networks... OK<br/>
-                                    > executing automation_scripts... OK<br/>
-                                    > status: <span style={{ color: '#00ff88' }}>READY_FOR_DEPLOYMENT</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+// Network canvas background
+(function() {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, particles = [];
+    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; init(); }
+    function init() {
+        particles = [];
+        const count = Math.floor((w * h) / 25000);
+        for (let i = 0; i < count; i++) particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25, s: Math.random()*1.5+0.5 });
+    }
+    function draw() {
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#00ff88';
+        ctx.strokeStyle = 'rgba(0,255,136,0.06)';
+        particles.forEach((p, i) => {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y < 0 || p.y > h) p.vy *= -1;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+            for (let j = i+1; j < particles.length; j++) {
+                const p2 = particles[j], dx = p.x-p2.x, dy = p.y-p2.y, d = Math.sqrt(dx*dx+dy*dy);
+                if (d < 120) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize(); draw();
+})();
 
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-                    <span className="font-mono text-[10px] tracking-widest text-gray-600">SCROLL</span>
-                    <div className="w-px h-8 bg-gradient-to-b from-gray-600 to-transparent animate-pulse"></div>
-                </div>
-            </section>
-        );
-
-        // ── DOCTRINE ──
-        const Doctrine = () => (
-            <section id="doctrine" className="py-24 relative">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="mb-16">
-                        <div className="font-mono text-[11px] tracking-[4px] uppercase mb-3" style={{ color: '#00ff88' }}>01 — Doctrine</div>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight">Comment j'opère</h2>
-                    </div>
-                    <div className="grid md:grid-cols-4 gap-px bg-white/5">
-                        {DOCTRINES.map((d, i) => (
-                            <div key={i} className="bg-[#050508] p-8 group hover:bg-[#0a0a12] transition-colors">
-                                <div className="font-mono text-5xl font-bold text-gray-800 group-hover:text-green-900 transition-colors mb-6">{d.num}</div>
-                                <h3 className="text-lg font-bold mb-2 tracking-tight" dangerouslySetInnerHTML={{ __html: d.title.replace(' ', '<br>') }} />
-                                <p className="text-sm text-gray-500 leading-relaxed mb-4">{d.desc}</p>
-                                <div className="font-mono text-[10px] tracking-widest" style={{ color: '#00ff88' }}>→ {d.tag}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
-
-        // ── PROJECT CARD ──
-        const ProjectCard = ({ title, tech, desc, status, icon: Icon, color }) => {
-            const getStatusStyle = (s) => {
-                if (s.includes('EXIT') || s.includes('SOLD')) return 'text-purple-400 bg-purple-500/10 border-purple-500/30';
-                if (s.includes('OPERATIONAL') || s.includes('DEPLOYED')) return 'text-green-400 bg-green-500/10 border-green-500/30';
-                if (s.includes('WHITE') || s.includes('RESEARCH') || s.includes('PUBLISHED')) return 'text-blue-400 bg-blue-500/10 border-blue-500/30';
-                if (s.includes('BETA') || s.includes('MARKET')) return 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30';
-                return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/30';
-            };
-            return (
-                <div className="group relative glass glass-hover p-5 rounded-lg flex flex-col h-full transition-all duration-300">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="p-2 rounded bg-gray-900 border border-white/5 group-hover:border-green-500/30 transition-colors">
-                            <Icon size={20} className={color || 'text-gray-400'} />
-                        </div>
-                        <span className={`text-[9px] font-mono px-2 py-1 rounded border tracking-wider ${getStatusStyle(status)}`}>{status}</span>
-                    </div>
-                    <h3 className="text-base font-bold font-mono tracking-tight mb-1 group-hover:text-green-400 transition-colors">{title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed mb-4 flex-grow">{desc}</p>
-                    <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/5 mt-auto">
-                        {tech.map((t, i) => (
-                            <span key={i} className="text-[9px] font-mono text-gray-600 bg-gray-900/50 px-2 py-0.5 rounded group-hover:text-green-400/70 transition-colors">{t}</span>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        // ── MATRICE ──
-        const Matrice = () => (
-            <section id="matrice" className="py-24 relative">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="mb-16">
-                        <div className="font-mono text-[11px] tracking-[4px] uppercase mb-3" style={{ color: '#00ff88' }}>02 — La Matrice</div>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight">Systèmes déployés</h2>
-                    </div>
-                    {CATEGORIES.map((cat) => (
-                        <div key={cat.id} className="mb-16 last:mb-0">
-                            <div className="flex items-start gap-6 mb-6">
-                                <div className="font-mono text-6xl font-bold text-gray-800 leading-none flex-shrink-0">{cat.number}</div>
-                                <div className="pt-2">
-                                    <div className="font-mono text-[10px] tracking-[3px] uppercase mb-1" style={{ color: '#ff2d2d' }}>{cat.label}</div>
-                                    <h3 className="text-xl font-bold tracking-tight">{cat.title}</h3>
-                                    <p className="text-sm text-gray-500 mt-1 max-w-xl">{cat.desc}</p>
-                                </div>
-                            </div>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {cat.projects.map((p, i) => (
-                                    <ProjectCard key={i} {...p} />
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        );
-
-        // ── METRICS ──
-        const Metrics = () => (
-            <section id="metriques" className="py-24 relative">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="mb-16">
-                        <div className="font-mono text-[11px] tracking-[4px] uppercase mb-3" style={{ color: '#00ff88' }}>03 — Métriques</div>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight">Chiffres d'exécution</h2>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-white/5">
-                        {METRICS.map((m, i) => (
-                            <div key={i} className="bg-[#050508] p-8 text-center group hover:bg-[#0a0a12] transition-colors">
-                                <div className="font-mono text-4xl font-bold mb-2 neon-green" style={{ color: '#00ff88' }}>{m.value}</div>
-                                <div className="text-[10px] text-gray-600 uppercase tracking-widest leading-tight">{m.label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
-
-        // ── CONTACT ──
-        const Contact = () => (
-            <section id="contact" className="py-24 flex items-center justify-center">
-                <div className="max-w-3xl w-full px-6 text-center">
-                    <div className="mb-8">
-                        <div className="font-mono text-[11px] tracking-[4px] uppercase mb-3" style={{ color: '#00ff88' }}>04 — Contact</div>
-                        <h2 className="text-4xl md:text-5xl font-black tracking-tight">Initier le contact</h2>
-                    </div>
-                    <div className="glass p-12 relative">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-0.5" style={{ background: '#00ff88' }}></div>
-                        <h3 className="text-2xl font-bold mb-3">Vous cherchez de l'efficacité chirurgicale, pas des heures facturables.</h3>
-                        <p className="text-gray-400 mb-8 max-w-md mx-auto">Pas de pitch deck. Pas de RFP. Décrivez le problème. Si c'est dans mon spectre, je déploie.</p>
-                        <a href="mailto:architect@cotcollective.com" className="inline-block font-mono text-lg px-10 py-4 border transition-all hover:text-black" style={{ borderColor: '#00ff88', color: '#00ff88' }} onMouseEnter={e => { e.target.style.background = '#00ff88'; e.target.style.boxShadow = '0 0 40px rgba(0,255,136,0.3)'; }} onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.boxShadow = 'none'; }}>
-                            architect@cotcollective.com
-                        </a>
-                        <p className="font-mono text-[10px] text-gray-600 mt-6 tracking-widest uppercase">Pour les opérations nécessitant une exécution asymétrique</p>
-                    </div>
-                    <div className="mt-8 p-5 text-left text-sm border border-red-500/20 bg-red-500/5" style={{ borderLeftWidth: '2px', borderLeftColor: '#ff2d2d' }}>
-                        <strong className="text-red-400">⚠️ CLOSED INTELLECTUAL PROPERTY</strong> — Tous les dépôts sont des Proof of Work démontrant la capacité d'exécution de l'Architect. Le code source métier reste Closed IP. Toute reproduction, ingénierie inverse ou usage commercial est strictement interdit sans accord explicite. Consultez <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md" className="text-green-400 hover:underline">LICENSE_RESTRICTIVE.md</a>.
-                    </div>
-                </div>
-            </section>
-        );
-
-        // ── FOOTER ──
-        const Footer = ({ onTriggerMatrix }) => (
-            <footer className="py-8 border-t border-white/5 bg-black/30 backdrop-blur">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-gray-600">
-                    <p>© 2025 THE ARCHITECT — MONTRÉAL, QC. ALL RIGHTS RESERVED.</p>
-                    <div className="flex items-center gap-6">
-                        <a href="https://github.com/cotcollective" className="hover:text-green-400 transition-colors">GITHUB</a>
-                        <a href="mailto:architect@cotcollective.com" className="hover:text-green-400 transition-colors">EMAIL</a>
-                        <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md" className="hover:text-green-400 transition-colors">LICENCE</a>
-                        <button onClick={onTriggerMatrix} className="text-green-500 hover:text-green-400 transition-colors cursor-pointer">STATUS: OPERATIONAL</button>
-                    </div>
-                </div>
-            </footer>
-        );
-
-        // ── APP ──
-        const App = () => {
-            const [showMatrix, setShowMatrix] = useState(false);
-            const [showTerminal, setShowTerminal] = useState(false);
-
-            useEffect(() => {
-                const handleKey = (e) => {
-                    if (e.key === '`' || e.key === '²') { e.preventDefault(); setShowTerminal(prev => !prev); }
-                };
-                window.addEventListener('keydown', handleKey);
-                return () => window.removeEventListener('keydown', handleKey);
-            }, []);
-
-            return (
-                <div className="relative min-h-screen text-gray-200" style={{ selectionBackground: '#00ff8830', selectionColor: '#00ff88' }}>
-                    {showMatrix && <MatrixModal onClose={() => setShowMatrix(false)} onRedPill={() => { setShowMatrix(false); setShowTerminal(true); }} />}
-                    {showTerminal && <GhostTerminal onClose={() => setShowTerminal(false)} />}
-                    <NetworkBackground />
-                    <Navbar />
-                    <Hero />
-                    <Doctrine />
-                    <Matrice />
-                    <Metrics />
-                    <Contact />
-                    <Footer onTriggerMatrix={() => setShowMatrix(true)} />
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t) t.scrollIntoView({ behavior: 'smooth' }); });
+});
+</script>
 </body>
 </html>
