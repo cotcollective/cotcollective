@@ -6,599 +6,661 @@
     <title>COT COLLECTIVE — The Architect</title>
     <meta name="description" content="Systems Architect & Vibecoder. Orchestration systémique. Exécution asymétrique. Montréal.">
     <meta name="robots" content="noindex, nofollow">
+    <meta property="og:title" content="COT COLLECTIVE — The Architect">
+    <meta property="og:description" content="Systems Architect & Vibecoder. Zero-friction deployment. Montréal.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600;800&display=swap');
+        /* ═══════════════════════════════════════════════════
+           RESET & BASE
+           ═══════════════════════════════════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --bg: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-card: #141414;
+            --bg: #050505;
+            --bg-raised: #0a0a0a;
+            --bg-card: #0d0d0d;
+            --bg-card-hover: #111111;
             --border: #1a1a1a;
-            --text: #e0e0e0;
-            --text-dim: #666666;
+            --border-accent: #00ff8820;
+            --text: #f0f0f0;
+            --text-secondary: #999999;
+            --text-dim: #555555;
             --accent: #00ff88;
-            --accent-dim: #00cc6a;
-            --danger: #ff3333;
-            --danger-dim: #cc2929;
+            --accent-soft: #00ff8815;
+            --accent-glow: #00ff8830;
+            --danger: #ff2d2d;
+            --danger-soft: #ff2d2d15;
+            --mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --sans: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.6;
+            font-family: var(--sans);
+            line-height: 1.7;
             overflow-x: hidden;
         }
 
-        /* Scanline overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 255, 136, 0.008) 2px,
-                rgba(0, 255, 136, 0.008) 4px
-            );
+        ::selection { background: var(--accent); color: var(--bg); }
+
+        /* ═══════════════════════════════════════════════════
+           LOADING SCREEN
+           ═══════════════════════════════════════════════════ */
+        .loader {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-text {
+            font-family: var(--mono); font-size: 12px; letter-spacing: 6px;
+            color: var(--accent); text-transform: uppercase;
+            animation: loaderPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes loaderPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* ═══════════════════════════════════════════════════
+           NOISE OVERLAY
+           ═══════════════════════════════════════════════════ */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 9998;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none; opacity: 0.4;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           NAVIGATION
+           ═══════════════════════════════════════════════════ */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 20px 0;
+            background: linear-gradient(to bottom, var(--bg), transparent);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo {
+            font-family: var(--mono); font-size: 13px; font-weight: 700;
+            color: var(--accent); text-decoration: none; letter-spacing: 2px;
+        }
+        .nav-links { display: flex; gap: 32px; list-style: none; }
+        .nav-links a {
+            font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--text-dim); text-decoration: none;
+            transition: color 0.3s ease; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+            background: var(--accent); transition: width 0.3s ease;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* ═══════════════════════════════════════════════════
+           CONTAINERS & LAYOUT
+           ═══════════════════════════════════════════════════ */
+        .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+        section { padding: 120px 0; position: relative; }
+        section + section { border-top: 1px solid var(--border); }
+
+        .section-header { margin-bottom: 64px; }
+        .section-tag {
+            font-family: var(--mono); font-size: 11px; letter-spacing: 4px;
+            text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .section-tag::before {
+            content: ''; display: block; width: 24px; height: 1px; background: var(--accent);
+        }
+        .section-title {
+            font-size: clamp(32px, 5vw, 52px); font-weight: 800;
+            letter-spacing: -1.5px; line-height: 1.1;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           HERO
+           ═══════════════════════════════════════════════════ */
+        #hero {
+            min-height: 100vh; display: flex; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        #hero::before {
+            content: ''; position: absolute; top: -50%; right: -30%;
+            width: 80vw; height: 80vw; border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
             pointer-events: none;
-            z-index: 9999;
         }
-
-        .container {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ── Hero ── */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-        }
-
-        .hero-ascii {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            line-height: 1.15;
-            color: var(--accent);
-            white-space: pre;
+        .hero-content { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--accent);
+            padding: 8px 16px; border: 1px solid var(--border-accent);
             margin-bottom: 32px;
-            opacity: 0.85;
+            background: var(--accent-soft);
         }
+        .hero-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+        @keyframes dotPulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); } 50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; } }
 
         .hero-title {
-            font-size: clamp(28px, 5vw, 48px);
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
+            font-size: clamp(40px, 7vw, 80px); font-weight: 900;
+            letter-spacing: -3px; line-height: 0.95; margin-bottom: 24px;
         }
-
-        .hero-title .accent {
-            color: var(--accent);
+        .hero-title .line { display: block; }
+        .hero-title .accent { color: var(--accent); }
+        .hero-title .outline {
+            color: transparent; -webkit-text-stroke: 1px var(--text-dim);
         }
 
         .hero-subtitle {
-            font-size: clamp(14px, 2vw, 18px);
-            color: var(--text-dim);
-            font-weight: 300;
-            margin-bottom: 40px;
+            font-size: clamp(16px, 2.5vw, 20px); color: var(--text-secondary);
+            font-weight: 300; margin-bottom: 48px; max-width: 540px; line-height: 1.6;
         }
+        .hero-subtitle strong { color: var(--text); font-weight: 600; }
 
-        .hero-subtitle .separator {
-            color: var(--accent);
-            margin: 0 8px;
+        .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; background: var(--accent); color: var(--bg);
+            font-family: var(--mono); font-size: 12px; font-weight: 600;
+            letter-spacing: 1px; text-transform: uppercase; text-decoration: none;
+            border: none; cursor: pointer; transition: all 0.3s ease;
         }
+        .btn-primary:hover { box-shadow: 0 0 40px var(--accent-glow); transform: translateY(-1px); }
+        .btn-primary svg { width: 14px; height: 14px; }
 
-        .hero-cta {
-            display: inline-block;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 12px 32px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            text-decoration: none;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: transparent;
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 14px 28px; background: transparent; color: var(--text-secondary);
+            font-family: var(--mono); font-size: 12px; font-weight: 400;
+            letter-spacing: 1px; text-transform: uppercase; text-decoration: none;
+            border: 1px solid var(--border); cursor: pointer; transition: all 0.3s ease;
         }
+        .btn-ghost:hover { border-color: var(--text-dim); color: var(--text); }
 
-        .hero-cta:hover {
-            background: var(--accent);
-            color: var(--bg);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+        .hero-scroll {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: pulse 2s infinite;
+        .hero-scroll span {
+            font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+            text-transform: uppercase; color: var(--text-dim);
         }
+        .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--text-dim), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+        @keyframes scrollPulse { 0%,100% { opacity: 0.3; height: 40px; } 50% { opacity: 1; height: 50px; } }
 
-        .scroll-indicator span {
-            display: block;
-            width: 20px;
-            height: 20px;
-            border-right: 1px solid var(--text-dim);
-            border-bottom: 1px solid var(--text-dim);
-            transform: rotate(45deg);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        /* ── Sections ── */
-        section {
-            padding: 80px 0;
-        }
-
-        .section-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-
-        .section-title {
-            font-size: clamp(24px, 4vw, 36px);
-            font-weight: 800;
-            margin-bottom: 40px;
-            letter-spacing: -0.5px;
-        }
-
-        /* ── Doctrine ── */
+        /* ═══════════════════════════════════════════════════
+           DOCTRINE
+           ═══════════════════════════════════════════════════ */
         .doctrine-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 24px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+            background: var(--border);
         }
-
         .doctrine-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 28px;
-            transition: border-color 0.3s ease;
+            background: var(--bg); padding: 40px 32px; position: relative;
+            transition: background 0.4s ease;
         }
-
-        .doctrine-card:hover {
-            border-color: var(--accent);
+        .doctrine-card:hover { background: var(--bg-raised); }
+        .doctrine-card .num {
+            font-family: var(--mono); font-size: 48px; font-weight: 700;
+            color: var(--border); line-height: 1; margin-bottom: 24px;
+            transition: color 0.4s ease;
         }
-
-        .doctrine-card .number {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--accent);
-            margin-bottom: 16px;
-        }
-
+        .doctrine-card:hover .num { color: var(--accent-glow); }
         .doctrine-card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 17px; font-weight: 700; margin-bottom: 8px;
+            letter-spacing: -0.3px;
         }
-
         .doctrine-card p {
-            font-size: 13px;
-            color: var(--text-dim);
-            line-height: 1.5;
+            font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+        }
+        .doctrine-card .icon {
+            font-family: var(--mono); font-size: 11px; color: var(--accent);
+            margin-top: 24px; letter-spacing: 1px;
         }
 
-        /* ── Matrice ── */
-        .matrice-block {
-            margin-bottom: 48px;
+        /* ═══════════════════════════════════════════════════
+           MATRICE — PROJECTS
+           ═══════════════════════════════════════════════════ */
+        .category { margin-bottom: 80px; }
+        .category:last-child { margin-bottom: 0; }
+        .category-header { margin-bottom: 32px; display: flex; align-items: flex-start; gap: 24px; }
+        .category-number {
+            font-family: var(--mono); font-size: 64px; font-weight: 700;
+            color: var(--border); line-height: 1; flex-shrink: 0;
+            min-width: 80px;
+        }
+        .category-info { padding-top: 8px; }
+        .category-label {
+            font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--danger); margin-bottom: 4px;
+        }
+        .category-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .category-desc {
+            font-size: 14px; color: var(--text-secondary); margin-top: 4px; max-width: 600px;
         }
 
-        .matrice-block .matrice-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            color: var(--danger);
-            margin-bottom: 4px;
+        .project-card {
+            display: grid; grid-template-columns: 180px 1fr auto;
+            align-items: center; padding: 24px 28px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            margin-bottom: 8px; text-decoration: none; color: var(--text);
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .project-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+            width: 2px; background: var(--accent); transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        .project-card:hover { background: var(--bg-card-hover); border-color: #222; }
+        .project-card:hover::before { transform: scaleY(1); }
+
+        .project-card .name {
+            font-family: var(--mono); font-size: 14px; font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .project-card .desc {
+            font-size: 13px; color: var(--text-secondary); padding: 0 24px; line-height: 1.5;
+        }
+        .project-card .status {
+            font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+            text-transform: uppercase; padding: 4px 12px;
+            border: 1px solid var(--accent); color: var(--accent);
+            white-space: nowrap;
+        }
+        .project-card .status.dev { border-color: var(--text-dim); color: var(--text-dim); }
+
+        /* ═══════════════════════════════════════════════════
+           METRICS
+           ═══════════════════════════════════════════════════ */
+        .metrics-container {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1px; background: var(--border);
+        }
+        .metric {
+            background: var(--bg); padding: 48px 32px; text-align: center;
+            transition: background 0.4s ease;
+        }
+        .metric:hover { background: var(--bg-raised); }
+        .metric-value {
+            font-family: var(--mono); font-size: 48px; font-weight: 700;
+            color: var(--accent); line-height: 1; margin-bottom: 12px;
+        }
+        .metric-label {
+            font-size: 11px; color: var(--text-dim); text-transform: uppercase;
+            letter-spacing: 2px; line-height: 1.4;
         }
 
-        .matrice-block h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        /* ═══════════════════════════════════════════════════
+           CONTACT
+           ═══════════════════════════════════════════════════ */
+        .contact-box {
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 80px 48px; text-align: center; position: relative;
         }
-
-        .matrice-block .matrice-desc {
-            font-size: 13px;
-            color: var(--text-dim);
-            font-style: italic;
-            margin-bottom: 16px;
+        .contact-box::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 60px; height: 2px; background: var(--accent);
         }
-
-        .project-row {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--accent);
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: var(--text);
+        .contact-box h3 {
+            font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px;
         }
-
-        .project-row:hover {
-            border-left-color: var(--danger);
-            background: var(--bg-secondary);
+        .contact-box .sub {
+            font-size: 15px; color: var(--text-secondary); margin-bottom: 40px;
+            max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.6;
         }
-
-        .project-row .project-name {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            font-weight: 500;
-            flex: 1;
-        }
-
-        .project-row .project-desc {
-            font-size: 13px;
-            color: var(--text-dim);
-            flex: 2;
-            padding: 0 16px;
-        }
-
-        .project-row .project-status {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 1px;
-            padding: 3px 8px;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            text-transform: uppercase;
-        }
-
-        .project-row .project-status.dev {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* ── Metrics ── */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-        }
-
-        .metric-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 24px;
-            text-align: center;
-        }
-
-        .metric-card .metric-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
-
-        .metric-card .metric-label {
-            font-size: 11px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* ── Contact ── */
-        .contact-block {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 48px;
-            text-align: center;
-        }
-
-        .contact-block h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .contact-block p {
-            color: var(--text-dim);
-            font-size: 14px;
-            margin-bottom: 24px;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
         .contact-email {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 16px;
-            color: var(--accent);
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.3s ease;
+            display: inline-block; font-family: var(--mono); font-size: 18px;
+            color: var(--accent); text-decoration: none; padding: 16px 32px;
+            border: 1px solid var(--accent); transition: all 0.3s ease;
         }
-
         .contact-email:hover {
-            border-bottom-color: var(--accent);
+            background: var(--accent); color: var(--bg);
+            box-shadow: 0 0 60px var(--accent-glow);
         }
-
         .contact-note {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-top: 16px;
-            letter-spacing: 1px;
+            font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+            margin-top: 24px; letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* ── Warning ── */
-        .warning-banner {
-            background: rgba(255, 51, 51, 0.05);
-            border: 1px solid rgba(255, 51, 51, 0.2);
-            border-left: 3px solid var(--danger);
-            padding: 20px 24px;
-            margin-top: 60px;
-            font-size: 13px;
-            color: var(--text-dim);
+        /* ═══════════════════════════════════════════════════
+           WARNING BANNER
+           ═══════════════════════════════════════════════════ */
+        .warning {
+            margin-top: 48px; padding: 24px 28px;
+            border: 1px solid rgba(255,45,45,0.2); border-left: 2px solid var(--danger);
+            background: var(--danger-soft); font-size: 13px; color: var(--text-secondary);
+            line-height: 1.7;
         }
+        .warning strong { color: var(--danger); }
+        .warning a { color: var(--accent); text-decoration: none; }
+        .warning a:hover { text-decoration: underline; }
 
-        .warning-banner strong {
-            color: var(--danger);
-        }
-
-        /* ── Footer ── */
+        /* ═══════════════════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════════════════ */
         footer {
-            padding: 40px 0;
-            text-align: center;
+            padding: 48px 0; text-align: center;
             border-top: 1px solid var(--border);
         }
+        .footer-logo {
+            font-family: var(--mono); font-size: 13px; font-weight: 700;
+            color: var(--text-dim); letter-spacing: 3px; margin-bottom: 8px;
+        }
+        .footer-copy { font-size: 12px; color: var(--text-dim); }
+        .footer-copy a { color: var(--accent); text-decoration: none; }
+        .footer-copy a:hover { text-decoration: underline; }
+        .footer-links { margin-top: 16px; display: flex; justify-content: center; gap: 24px; }
+        .footer-links a {
+            font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+            text-decoration: none; letter-spacing: 1px;
+        }
+        .footer-links a:hover { color: var(--text); }
 
-        footer .footer-ascii {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-bottom: 16px;
-            white-space: pre;
-            line-height: 1.15;
+        /* ═══════════════════════════════════════════════════
+           ANIMATIONS
+           ═══════════════════════════════════════════════════ */
+        .reveal {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ═══════════════════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .doctrine-grid { grid-template-columns: repeat(2, 1fr); }
+            .metrics-container { grid-template-columns: repeat(2, 1fr); }
+            .project-card { grid-template-columns: 1fr; gap: 8px; }
+            .project-card .desc { padding: 0; }
         }
 
-        footer p {
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* ── Responsive ── */
         @media (max-width: 640px) {
-            .hero-ascii {
-                font-size: 5px;
-            }
-
-            .project-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-
-            .project-row .project-desc {
-                padding: 4px 0;
-            }
-
-            .contact-block {
-                padding: 32px 20px;
-            }
+            nav .container { padding: 0 20px; }
+            .nav-links { display: none; }
+            section { padding: 80px 0; }
+            .container { padding: 0 20px; }
+            .doctrine-grid { grid-template-columns: 1fr; }
+            .metrics-container { grid-template-columns: 1fr 1fr; }
+            .hero-title { letter-spacing: -2px; }
+            .hero-actions { flex-direction: column; }
+            .btn-primary, .btn-ghost { justify-content: center; width: 100%; }
+            .contact-box { padding: 48px 24px; }
+            .category-header { flex-direction: column; gap: 8px; }
+            .category-number { font-size: 40px; min-width: auto; }
+            .metric-value { font-size: 32px; }
+            .metric { padding: 32px 20px; }
         }
     </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- HERO                                                        -->
-<!-- ════════════════════════════════════════════════════════════ -->
-<section class="hero">
+<!-- LOADER -->
+<div class="loader" id="loader">
+    <div class="loader-text">INITIALISATION</div>
+</div>
+
+<!-- NAVIGATION -->
+<nav>
     <div class="container">
-        <div class="hero-ascii">
- ██████╗ ██████╗ ███████╗██╗███████╗████████╗ ██████╗ ██████╗ ███╗   ██╗████████╗██████╗  █████╗ ███████╗███████╗
-██╔════╝██╔═══██╗██╔════╝██║██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗████╗  ██║╚══██╔══╝██╔══██╗██╔══██╗██╔════╝██╔════╝
-██║     ██║   ██║██████╗ ██║███████╗   ██║   ██║   ██║██████╔╝██╔██╗ ██║   ██║   ██████╔╝███████║███████╗███████╗
-██║     ██║   ██║██╔══╝  ██║╚══════╝   ██║   ██║   ██║██╔══██╗██║╚██╗██║   ██║   ██╔═══╝ ██╔══██║╚══════║╚══════║
-╚██████╗╚██████╔╝██║     ██║███████╗   ██║   ╚██████╔╝██║  ██║██║ ╚█████║   ██║   ██║     ██║  ██║███████║███████║
- ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚════╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝</div>
-        <h1 class="hero-title">THE <span class="accent">ARCHITECT</span></h1>
-        <p class="hero-subtitle">Systems Architect <span class="separator">|</span> Vibecoder <span class="separator">|</span> Montréal</p>
-        <a href="#doctrine" class="hero-cta">Entrer dans la matrice</a>
+        <a href="#hero" class="nav-logo">COT◈COLLECTIVE</a>
+        <ul class="nav-links">
+            <li><a href="#doctrine">Doctrine</a></li>
+            <li><a href="#matrice">Matrice</a></li>
+            <li><a href="#metriques">Métriques</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
     </div>
-    <div class="scroll-indicator"><span></span></div>
+</nav>
+
+<!-- ═════════════════ HERO ═════════════════ -->
+<section id="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Systems Architect — Montréal
+            </div>
+            <h1 class="hero-title">
+                <span class="line">The</span>
+                <span class="line"><span class="accent">Architect</span></span>
+                <span class="line outline">Vibecoder</span>
+            </h1>
+            <p class="hero-subtitle">
+                J'orchestre des systèmes, pas des <strong>comités</strong>. 
+                MVP déployé en <strong><2h</strong>. LLM locaux. 
+                <strong>Zéro friction.</strong> Souveraineté matérielle ou rien.
+            </p>
+            <div class="hero-actions">
+                <a href="#contact" class="btn-primary">
+                    Initier le contact
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#matrice" class="btn-ghost">
+                    Voir la matrice
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+    </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- DOCTRINE                                                     -->
-<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ═════════════════ DOCTRINE ═════════════════ -->
 <section id="doctrine">
     <div class="container">
-        <div class="section-label">01 // Doctrine</div>
-        <h2 class="section-title">Comment je opère</h2>
-        <div class="doctrine-grid">
+        <div class="section-header reveal">
+            <div class="section-tag">01 — Doctrine</div>
+            <h2 class="section-title">Comment je opère</h2>
+        </div>
+        <div class="doctrine-grid reveal">
             <div class="doctrine-card">
-                <div class="number">01</div>
-                <h3>Orchestration Systémique</h3>
-                <p>Composants atomiques, flux directionnels, émergence contrôlée. Pas de moving parts inutiles.</p>
+                <div class="num">01</div>
+                <h3>Orchestration<br>Systémique</h3>
+                <p>Composants atomiques, flux directionnels, émergence contrôlée. Pas de moving parts inutiles — chaque élément sert.</p>
+                <div class="icon">→ SYSTEM DESIGN</div>
             </div>
             <div class="doctrine-card">
-                <div class="number">02</div>
-                <h3>Exécution Asymétrique</h3>
-                <p>MVP conçu et déployé en moins de 2 heures. Du concept à la production. Pas de sprints de 2 semaines.</p>
+                <div class="num">02</div>
+                <h3>Exécution<br>Asymétrique</h3>
+                <p>Du concept à la production en <2h. Pas de sprints de 2 semaines. Un problème, une solution, déploiement.</p>
+                <div class="icon">→ RAPID DEPLOY</div>
             </div>
             <div class="doctrine-card">
-                <div class="number">03</div>
-                <h3>Souveraineté Matérielle</h3>
-                <p>Déploiement sur LLM locaux. Quadro rigs. Aucune dépendance cloud. Le hardware est la licence.</p>
+                <div class="num">03</div>
+                <h3>Souveraineté<br>Matérielle</h3>
+                <p>LLM locaux. Quadro rigs. Aucune dépendance cloud. Le hardware est la licence. Les données restent chez moi.</p>
+                <div class="icon">→ LOCAL FIRST</div>
             </div>
             <div class="doctrine-card">
-                <div class="number">04</div>
-                <h3>Zero-Friction Deployment</h3>
-                <p>Pas de comités. Pas de RFP. Un problème, une solution, shipping. La bureaucratie est l'ennemi.</p>
+                <div class="num">04</div>
+                <h3>Zero-Friction<br>Deployment</h3>
+                <p>Pas de RFP. Pas de pitch deck. Pas de bureaucracy. Un problème → une solution → shipping. Le mouvement est tout.</p>
+                <div class="icon">→ NO BUREAUCRACY</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- LA MATRICE                                                   -->
-<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ═════════════════ MATRICE ═════════════════ -->
 <section id="matrice">
     <div class="container">
-        <div class="section-label">02 // La Matrice</div>
-        <h2 class="section-title">Systèmes déployés</h2>
+        <div class="section-header reveal">
+            <div class="section-tag">02 — La Matrice</div>
+            <h2 class="section-title">Systèmes déployés</h2>
+        </div>
 
-        <!-- I -->
-        <div class="matrice-block">
-            <div class="matrice-label">Catégorie I</div>
-            <h3>Logistique Terrestre & Événementiel</h3>
-            <p class="matrice-desc">Systèmes de gestion de crise et orchestration terrain pour environnements haute pression.</p>
-            <a href="#" class="project-row">
-                <span class="project-name">Sentinel</span>
-                <span class="project-desc">Gestion de crise Grand Prix — surveillance temps réel, escalation automatisée, tableau de bord opérateur</span>
-                <span class="project-status">Operational</span>
+        <!-- Catégorie I -->
+        <div class="category reveal">
+            <div class="category-header">
+                <div class="category-number">I</div>
+                <div class="category-info">
+                    <div class="category-label">Logistique Terrestre & Événementiel</div>
+                    <div class="category-title">Gestion de crise et orchestration terrain</div>
+                    <div class="category-desc">Systèmes déployés sous pression — environnements haute vitesse, zéro marge d'erreur.</div>
+                </div>
+            </div>
+            <a href="#" class="project-card">
+                <span class="name">Sentinel</span>
+                <span class="desc">Gestion de crise Grand Prix — surveillance temps réel, escalation automatisée, tableau de bord opérateur</span>
+                <span class="status">Operational</span>
             </a>
         </div>
 
-        <!-- II -->
-        <div class="matrice-block">
-            <div class="matrice-label">Catégorie II</div>
-            <h3>Orchestration IA & Systèmes Locaux</h3>
-            <p class="matrice-desc">Moteurs autonomes, bots multi-plateformes, forges de modèles — tous souverains.</p>
-            <a href="#" class="project-row">
-                <span class="project-name">Griselda Bot Suite</span>
-                <span class="project-desc">Suite d'agents IA multi-plateformes (Telegram, Instagram, Twitter) avec moteur centralisé et proxy reverse</span>
-                <span class="project-status">Operational</span>
+        <!-- Catégorie II -->
+        <div class="category reveal">
+            <div class="category-header">
+                <div class="category-number">II</div>
+                <div class="category-info">
+                    <div class="category-label">Orchestration IA & Systèmes Locaux</div>
+                    <div class="category-title">Moteurs autonomes, forges de modèles</div>
+                    <div class="category-desc">Agents multi-plateformes, orchestration LLM, fine-tuning souverain — toute la chaîne, zéro API externe.</div>
+                </div>
+            </div>
+            <a href="#" class="project-card">
+                <span class="name">Griselda Bot Suite</span>
+                <span class="desc">Suite d'agents IA multi-plateformes (Telegram, Instagram, Twitter) avec moteur centralisé et proxy reverse</span>
+                <span class="status">Operational</span>
             </a>
-            <a href="#" class="project-row">
-                <span class="project-name">Project Archytas</span>
-                <span class="project-desc">Framework d'orchestration IA — architecture modulaire pour systèmes autonomes</span>
-                <span class="project-status dev">In Dev</span>
+            <a href="#" class="project-card">
+                <span class="name">Project Archytas</span>
+                <span class="desc">Framework d'orchestration IA — architecture modulaire pour systèmes autonomes</span>
+                <span class="status dev">In Dev</span>
             </a>
-            <a href="#" class="project-row">
-                <span class="project-name">LATENT_SMITH</span>
-                <span class="project-desc">Forge de modèles locaux — fine-tuning, merge, quantization sur infrastructure GPU privée</span>
-                <span class="project-status dev">In Dev</span>
+            <a href="#" class="project-card">
+                <span class="name">LATENT_SMITH</span>
+                <span class="desc">Forge de modèles locaux — fine-tuning, merge, quantization sur infrastructure GPU privée</span>
+                <span class="status dev">In Dev</span>
             </a>
         </div>
 
-        <!-- III -->
-        <div class="matrice-block">
-            <div class="matrice-label">Catégorie III</div>
-            <h3>Héritage Numérique & Préservation</h3>
-            <p class="matrice-desc">Préservation de la mémoire, accès perpétuel, souveraineté posthume.</p>
-            <a href="#" class="project-row">
-                <span class="project-name">Testament Vivant</span>
-                <span class="project-desc">Système de préservation et transmission numérique — accès conditionnel basé sur le temps et l'identité</span>
-                <span class="project-status">Operational</span>
+        <!-- Catégorie III -->
+        <div class="category reveal">
+            <div class="category-header">
+                <div class="category-number">III</div>
+                <div class="category-info">
+                    <div class="category-label">Héritage Numérique & Préservation</div>
+                    <div class="category-title">Mémoire souveraine, accès perpétuel</div>
+                    <div class="category-desc">Préservation de l'information au-delà du présent. Souveraineté numérique sur la mémoire collective.</div>
+                </div>
+            </div>
+            <a href="#" class="project-card">
+                <span class="name">Testament Vivant</span>
+                <span class="desc">Système de préservation et transmission numérique — accès conditionnel basé sur le temps et l'identité</span>
+                <span class="status">Operational</span>
             </a>
-            <a href="#" class="project-row">
-                <span class="project-name">JemesouviensTV</span>
-                <span class="project-desc">Archivage et diffusion pérenne de contenu culturel — mémoire collective souveraine</span>
-                <span class="project-status">Operational</span>
+            <a href="#" class="project-card">
+                <span class="name">JemesouviensTV</span>
+                <span class="desc">Archivage et diffusion pérenne de contenu culturel — mémoire collective souveraine</span>
+                <span class="status">Operational</span>
             </a>
         </div>
     </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- MÉTRIQUES                                                    -->
-<!-- ════════════════════════════════════════════════════════════ -->
-<section id="metrics">
+<!-- ═════════════════ MÉTRIQUES ═════════════════ -->
+<section id="metriques">
     <div class="container">
-        <div class="section-label">03 // Métriques</div>
-        <h2 class="section-title">Chiffres d'exécution</h2>
-        <div class="metrics-grid">
-            <div class="metric-card">
+        <div class="section-header reveal">
+            <div class="section-tag">03 — Métriques</div>
+            <h2 class="section-title">Chiffres d'exécution</h2>
+        </div>
+        <div class="metrics-container reveal">
+            <div class="metric">
                 <div class="metric-value"><2h</div>
-                <div class="metric-label">Conception → Déploiement</div>
+                <div class="metric-label">Conception →<br>Déploiement</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-value">1-3</div>
-                <div class="metric-label">Cycles d'itération</div>
+            <div class="metric">
+                <div class="metric-value">1–3</div>
+                <div class="metric-label">Cycles<br>d'itération</div>
             </div>
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-value">100%</div>
-                <div class="metric-label">LLM Local / Souverain</div>
+                <div class="metric-label">LLM Local<br>Souverain</div>
             </div>
-            <div class="metric-card">
+            <div class="metric">
                 <div class="metric-value">0</div>
-                <div class="metric-label">Friction bureaucratique</div>
+                <div class="metric-label">Friction<br>Bureaucratique</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- CONTACT                                                      -->
-<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ═════════════════ CONTACT ═════════════════ -->
 <section id="contact">
     <div class="container">
-        <div class="section-label">04 // Contact</div>
-        <div class="contact-block">
-            <h3>Vous cherchez de l'efficacité chirurgicale, pas des heures facturables.</h3>
-            <p>Pas de pitch deck. Pas de RFP. Décrivez le problème.</p>
-            <a href="mailto:architect@cotcollective.com" class="contact-email">architect@cotcollective.com</a>
-            <p class="contact-note">Pour les opérations nécessitant une exécution asymétrique.</p>
+        <div class="section-header reveal">
+            <div class="section-tag">04 — Contact</div>
+            <h2 class="section-title">Initier le contact</h2>
         </div>
-
-        <div class="warning-banner">
-            <strong>⚠️ CLOSED INTELLECTUAL PROPERTY</strong> — Tous les dépôts sont des Proof of Work démontrant la capacité d'exécution de l'Architect. Le code source métier reste Closed IP. Toute reproduction, ingénierie inverse ou usage commercial est strictement interdit sans accord explicite. Consultez <a href="LICENSE_RESTRICTIVE.html">LICENSE_RESTRICTIVE.md</a> pour les termes complets.
+        <div class="contact-box reveal">
+            <h3>Vous cherchez de l'efficacité chirurgicale, pas des heures facturables.</h3>
+            <p class="sub">Pas de pitch deck. Pas de RFP. Décrivez le problème. Si c'est dans mon spectre, je déploie.</p>
+            <a href="mailto:architect@cotcollective.com" class="contact-email">architect@cotcollective.com</a>
+            <p class="contact-note">Pour les opérations nécessitant une exécution asymétrique</p>
+        </div>
+        <div class="warning reveal">
+            <strong>⚠️ CLOSED INTELLECTUAL PROPERTY</strong> — Tous les dépôts sont des Proof of Work démontrant la capacité d'exécution de l'Architect. Le code source métier reste Closed IP. Toute reproduction, ingénierie inverse ou usage commercial est strictement interdit sans accord explicite. Consultez <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md">LICENSE_RESTRICTIVE.md</a> pour les termes complets.
         </div>
     </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- FOOTER                                                       -->
-<!-- ════════════════════════════════════════════════════════════ -->
+<!-- ═════════════════ FOOTER ═════════════════ -->
 <footer>
     <div class="container">
-        <div class="footer-ascii">
- ██████╗██╗  ██╗███████╗███████╗██████╗  ██████╗ ███╗   ██╗ ██████╗███████╗██╗███╗   ██╗ ██████╗███████╗███████╗
-██╔════╝██║  ██║██╔════╝██╔════╝██╔══██╗██╔═══██╗████╗  ██║██╔════╝██╔════╝██║████╗  ██║██╔════╝██╔════╝██╔════╝
-██║     ███████║█████╗  ███████╗██████╔╝██║   ██║██╔██╗ ██║██║     █████╗  ██║██╔██╗ ██║██║     █████╗  ███████╗
-██║     ██╔══██║██╔══╝  ╚══════╝██╔═══╝ ██║   ██║██║╚██╗██║██║     ██╔══╝  ██║██║╚██╗██║██║     ██╔══╝  ╚══════╝
-╚██████╗██║  ██║███████╗███████╗██║     ╚██████╔╝██║ ╚█████║╚██████╗██║     ██║██║ ╚████║╚██████╗███████╗███████╗
- ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝     ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚══════╝</div>
-        <p>&copy; 2025 The Architect — Montréal, QC. All rights reserved.</p>
-        <p style="margin-top:8px;"><a href="https://github.com/cotcollective">github.com/cotcollective</a></p>
+        <div class="footer-logo">COT◈COLLECTIVE</div>
+        <p class="footer-copy">&copy; 2025 The Architect — Montréal, QC. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="https://github.com/cotcollective">GitHub</a>
+            <a href="mailto:architect@cotcollective.com">Email</a>
+            <a href="https://github.com/cotcollective/cotcollective/blob/main/LICENSE_RESTRICTIVE.md">Licence</a>
+        </div>
     </div>
 </footer>
 
+<script>
+    // Loader
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('loader').classList.add('hidden');
+        }, 600);
+    });
+
+    // Scroll reveal
+    const reveal = () => {
+        const els = document.querySelectorAll('.reveal');
+        els.forEach(el => {
+            const top = el.getBoundingClientRect().top;
+            const threshold = window.innerHeight * 0.88;
+            if (top < threshold) el.classList.add('visible');
+        });
+    };
+    window.addEventListener('scroll', reveal, { passive: true });
+    window.addEventListener('resize', reveal, { passive: true });
+    reveal();
+
+    // Smooth anchor scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+</script>
 </body>
 </html>
